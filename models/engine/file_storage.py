@@ -19,7 +19,8 @@ class FileStorage:
         instances"""
         if not cls:
             return FileStorage.__objects
-        return {k: v for k, v in FileStorage.__objects.items() if type(v) == cls}
+        return {k: v for k, v in FileStorage.__objects.items()
+                if type(v) == cls}
 
     def new(self, obj):
         """sets in __objects the obj with key <obj class name>.id"""
