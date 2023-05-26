@@ -107,31 +107,3 @@ class DBStorage:
     def close(self):
         """ method on the private session attribute (self.__session) """
         self.__session.close()
-
-    def get(self, cls, id):
-        """
-        A method to retrieve one object
-        """
-        if cls and id:
-            if cls in DBStorage.__classNames:
-                for obj in self.__session.query(cls).all():
-                    if id == obj.id:
-                        return obj
-
-    def count(self, cls=None):
-        """
-        A method to count the number of objects in storage
-        """
-        count = 0
-        count_ = 0
-        if cls:
-            objs = self.__session.query(cls).all()
-            # objs -> list of returned objects
-            count = len(objs)
-        else:
-            for cls in DBStorage.__classNames:
-                objs = self.__session.query(cls).all()
-                # objs -> list of returned objects
-                count_ = len(objs)
-                count += count_
-        return count
