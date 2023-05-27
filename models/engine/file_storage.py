@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-""" the file storage module """
+"""
+the file storage module
+"""
 
 import json
 from models.base_model import BaseModel
