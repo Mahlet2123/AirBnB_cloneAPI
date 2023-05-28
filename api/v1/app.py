@@ -1,5 +1,8 @@
 #!/usr/bin/python3
-""" app module """
+"""
+app module that sets up a Flask application
+registers blueprints, and defines a teardown function
+"""
 from models import storage
 from flask import Flask
 from api.v1.views import app_views
@@ -7,7 +10,6 @@ from os import getenv
 
 
 app = Flask(__name__)
-# Register the app_views blueprint
 app.register_blueprint(app_views)
 
 @app.teardown_appcontext
