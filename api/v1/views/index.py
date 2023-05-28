@@ -9,4 +9,8 @@ from flask import jsonify
 
 @app_views.route('/status')
 def status():
+    """
+    returns a JSON response with a status message
+    when a GET request is made to the /status URL.
+    """
     return jsonify({"status": "OK"})
