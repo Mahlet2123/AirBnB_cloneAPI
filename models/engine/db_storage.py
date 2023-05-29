@@ -1,9 +1,5 @@
 #!/usr/bin/python3
-""" 
-The database storage module
-"""
-
-
+""" The database storage module """
 from sqlalchemy import create_engine, MetaData, text
 from models.base_model import BaseModel, Base
 from models.state import State
@@ -57,6 +53,20 @@ class DBStorage:
                     r_dict[key] = obj
         return r_dict
 
+    def my_all(self, cls=None):
+        # query to fetch all objects related to cls if cls
+        # is not None. Otherwise fetch all
+        list_obj = []
+        if not cls:
+            for obj in DBStorage.__classNames:
+                list_obj += self.__session.query(obj)
+        else:
+            list_obj = self.__session.query(cls)
+
+        # return the dictionary reperesentation
+        # return {v.__class__.__name__ + '.' + v.id: v for v in list_obj
+        return {type(v).__name__ + "." + v.id: v for v in list_obj}
+
     def new(self, obj):
         """add the object to the current
         database session (self.__session)"""
@@ -95,35 +105,5 @@ class DBStorage:
         return classes_dict
 
     def close(self):
-        """ 
-        method on the private session attribute (self.__session)
-        """
+        """ method on the private session attribute (self.__session) """
         self.__session.close()
-    
-    def get(self, cls, id):
-        """ 
-        method to retrieve one object
-        """
-        if cls and id:
-            if cls in DBStorage.__classNames:
-                for obj in self.__session.query(cls).all():
-                    if id == obj.id:
-                        return obj
-
-    def count(self, cls=None):
-        """
-        A method to count the number of objects in storage
-        """
-        count = 0
-        count_ = 0 
-        if cls:
-            objs = self.__session.query(cls).all()
-            # objs -> list of returned objects
-            count = len(objs)
-        else:
-            for cls in DBStorage.__classNames:
-                objs = self.__session.query(cls).all()
-                # objs -> list of returned objects
-                count_ = len(objs)
-                count += count_
-        return count 

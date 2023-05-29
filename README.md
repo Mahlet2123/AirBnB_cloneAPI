@@ -73,12 +73,6 @@ EOF  all  count  create  destroy  help  quit  show  update
 - The first web server in Python
 - static HTML file made dynamic by using objects stored in a file or database
 
-# Fifth step: RESTful API
-'0x05. AirBnB clone - RESTful API'
-
-- expose all your objects stored via a JSON web interface
-- manipulate your objects via a RESTful API
-
 ##  Bugs
 - No known bugs
 
