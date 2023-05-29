@@ -31,7 +31,6 @@ class DBStorage:
         self.__engine = create_engine(url, pool_pre_ping=True)
 
         if getenv("HBNB_ENV") == "test":
-            # drop all tables
             Base.metadata.drop_all(bind=self.__engine)
 
     def all(self, cls=None):
@@ -42,30 +41,14 @@ class DBStorage:
         r_dict = {}
         if cls:
             for obj in self.__session.query(cls).all():
-                # objs -> list of returned objects
                 key = "{}.{}".format(type(obj).__name__, obj.id)
                 r_dict[key] = obj
         else:
             for cls in DBStorage.__classNames:
                 for obj in self.__session.query(cls).all():
-                    # objs -> list of returned objects
                     key = "{}.{}".format(type(obj).__name__, obj.id)
                     r_dict[key] = obj
         return r_dict
-
-    def my_all(self, cls=None):
-        # query to fetch all objects related to cls if cls
-        # is not None. Otherwise fetch all
-        list_obj = []
-        if not cls:
-            for obj in DBStorage.__classNames:
-                list_obj += self.__session.query(obj)
-        else:
-            list_obj = self.__session.query(cls)
-
-        # return the dictionary reperesentation
-        # return {v.__class__.__name__ + '.' + v.id: v for v in list_obj
-        return {type(v).__name__ + "." + v.id: v for v in list_obj}
 
     def new(self, obj):
         """add the object to the current
