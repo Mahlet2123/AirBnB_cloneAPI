@@ -24,3 +24,4 @@ in index will be available in the current module.
 This allows the app_views blueprint to register these routes and views when
 it is used in the Flask application.
 """
+from api.v1.views.states import *
