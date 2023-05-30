@@ -1,5 +1,9 @@
 #!/usr/bin/python3
-"""__init__ module"""
+"""
+__init__ module
+"""
+
+
 from os import environ
 
 
