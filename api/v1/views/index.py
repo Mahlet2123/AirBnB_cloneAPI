@@ -19,7 +19,7 @@ from models.user import User
 from models.amenity import Amenity
 
 
-@app_views.route('/status')
+@app_views.route("/status")
 def status():
     """
     returns a JSON response with a status message
@@ -27,7 +27,8 @@ def status():
     """
     return jsonify({"status": "OK"})
 
-@app_views.route('/stats')
+
+@app_views.route("/stats")
 def stats():
     """
     retrieves the number of each objects by type
