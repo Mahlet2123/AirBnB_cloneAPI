@@ -40,6 +40,20 @@ class DBStorage:
         if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
 
+    def get(self, cls=None, id=""):
+        """returns object of type cls with string id or None if nonexistent"""
+        if cls is not None and id != "":
+            all_cls = self.all(cls)
+            for key, value in all_cls.items():
+                if key.split(".")[-1] == id:
+                    return value
+        return None
+
+    def count(self, cls=None):
+        """return num of objs matching class name or all if no class name"""
+        all_cls = self.all(cls)
+        return len(all_cls.items())
+
     def all(self, cls=None):
         """query on the current database session"""
         new_dict = {}
@@ -76,18 +90,31 @@ class DBStorage:
         self.__session.remove()
 
     def get(self, cls, id):
-        """Returns the object based on the class and its ID, or None"""
-        if type(cls) is not str:
-            cls = cls.__name__
-        return self.all().get(cls + "." + id)
+        """
+        Returns the object based on the class name and its ID, or
+        None if not found
+        """
+        if cls not in classes.values():
+            return None
+
+        all_cls = models.storage.all(cls)
+        for value in all_cls.values():
+            if (value.id == id):
+                return value
+
+        return None
 
     def count(self, cls=None):
-        """Count number of objects in storage"""
-        all_objects = self.all().values()
-        if cls:
-            if type(cls) is not str:
-                cls = cls.__name__
-            return len([obj for obj in all_objects if type(
-                        obj).__name__ == cls])
+        """
+        count the number of objects in storage
+        """
+        all_class = classes.values()
+
+        if not cls:
+            count = 0
+            for clas in all_class:
+                count += len(models.storage.all(clas).values())
         else:
-            return len(self.all())
+            count = len(models.storage.all(cls).values())
+
+        return count
