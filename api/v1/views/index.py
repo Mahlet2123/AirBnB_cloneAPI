@@ -21,20 +21,9 @@ def status():
     """
     return jsonify({"status": "OK"})
 
-@app_views.route('/api/v1/stats')
+@app_views.route('/stats')
 def stats():
     """
-    Returns the count of all objects by type
+    retrieves the number of each objects by type
     """
-    classes = {
-        'amenities': 'Amenity',
-        'cities': 'City',
-        'places': 'Place',
-        'reviews': 'Review',
-        'states': 'State',
-        'users': 'User'
-    }
-    counts = {}
-    for key, value in classes.items():
-        counts[key] = storage.count(value)
-    return jsonify(counts)
+
