@@ -50,17 +50,19 @@ def create_state():
     if data:
         try:
             json.dumps(data)
-            return True
         except ValueError:
-            print('Not a JSON')
-            abort(404)
-            return False
-    if data[name]:
+            return jsonify('Not a JSON'), 400
+    if 'name' in data:
         new_state = State().to_dict()
-        for key, value in data:
+        for key, value in data.items():
             new_state[key] = value
         response = make_response(jsonify(new_state), 201)
         return response
     else:
-        print('Missing name')
-        abort(404)
+        return jsonify('Missing name'), 400
+
+@app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=False)
+def update_state(state_id):
+    """ Updates a State """
+    state = storage.get(State, state_id)
+    if state:
