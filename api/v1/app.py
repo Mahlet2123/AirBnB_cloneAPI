@@ -2,7 +2,25 @@
 """
 app module that sets up a Flask application
 registers blueprints, and defines a teardown function
+
+first endpoint (route) will be to return the status of your API
+if we do not import those modules in the __init__.py file, we have to
+manually register each routes in the flask app. Eg:
+    app.register_blueprint(states.app_views)
+    app.register_blueprint(cities.app_views)
+    app.register_blueprint(amenities.app_views) ...
+Since, we imported the modules in the __init__.py file whereby the app_views
+blueprint is registered, we can just only register the 'app_views' blueprint
+so that the flask app can access all the routes and method in each module.
+In this case the 'app_views' blueprint is used as the container having all
+the routes and methods within the modules.
+
+Additionally, When we import the app_views blueprint into the module and
+also import the modules into the __init__.py file, you don't need to manually
+register each module in the Flask app. The registration happens automatically
+when the routes are defined within the modules using the app_views blueprint.
 """
+
 from models import storage
 from flask import Flask
 from api.v1.views import app_views

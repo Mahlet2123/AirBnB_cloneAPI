@@ -1,5 +1,14 @@
 #!/usr/bin/python3
-"""__init__ module"""
+""" Here we create blueprint object.
+The app_views blueprint object acts as a container that holds all
+the routes defined across multiple modules. It provides a consistent
+URL prefix (/api/v1) and other settings for those routes. Once we
+register the app_views blueprint with our Flask application, all the
+routes defined within the associated modules will be accessible through
+the URL prefix(/api/v1) defined in the app_views blueprint.
+"""
+
+
 from flask import Blueprint
 
 
