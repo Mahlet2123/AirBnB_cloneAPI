@@ -1,7 +1,13 @@
 #!/usr/bin/python3
-""" This script comprises a flask application """
+"""
+A Flask route defined within the api.v1.views blueprint.
 
+The api.v1.views blueprint is important
+because it allows for modular organization and
+separation of routes and views in a Flask application.
 
+It returns a JSON response with a status message.
+"""
 from api.v1.views import app_views
 from flask import jsonify
 from models import storage
@@ -14,13 +20,19 @@ from models.amenity import Amenity
 
 
 @app_views.route("/status")
-def _json():
-    _dict = {"status": "OK"}
-    return jsonify(_dict)
+def status():
+    """
+    returns a JSON response with a status message
+    when a GET request is made to the /status URL.
+    """
+    return jsonify({"status": "OK"})
 
 
 @app_views.route("/stats")
-def _count():
+def stats():
+    """
+    retrieves the number of each objects by type
+    """
     classes = {
         "amenities": Amenity,
         "cities": City,
@@ -29,6 +41,7 @@ def _count():
         "states": State,
         "users": User,
     }
-
-    _dic = {key: storage.count(val) for key, val in classes.items()}
-    return jsonify(_dic)
+    ret_dict = {}
+    for key, value in classes.items():
+        ret_dict[key] = storage.count(value)
+    return jsonify(ret_dict)
