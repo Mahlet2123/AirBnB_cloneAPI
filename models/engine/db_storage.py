@@ -1,128 +1,93 @@
 #!/usr/bin/python3
-""" 
-The database storage module
+"""
+Contains the class DBStorage
 """
 
-from sqlalchemy import create_engine, MetaData, text
+import models
+from models.amenity import Amenity
 from models.base_model import BaseModel, Base
-from models.state import State
 from models.city import City
-from models.user import User
 from models.place import Place
 from models.review import Review
-from models.amenity import Amenity
+from models.state import State
+from models.user import User
 from os import getenv
+import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+classes = {"Amenity": Amenity, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
 
 
 class DBStorage:
-    """DBStorage class"""
-
-    __classNames = [State, City, User, Place, Review, Amenity]
-
+    """interaacts with the MySQL database"""
     __engine = None
     __session = None
 
     def __init__(self):
-        """constructor"""
-        url = "mysql+mysqldb://{}:{}@{}/{}".format(
-            getenv("HBNB_MYSQL_USER"),
-            getenv("HBNB_MYSQL_PWD"),
-            getenv("HBNB_MYSQL_HOST"),
-            getenv("HBNB_MYSQL_DB"),
-        )
-
-        self.__engine = create_engine(url, pool_pre_ping=True)
-
-        if getenv("HBNB_ENV") == "test":
-            # drop all tables
-            Base.metadata.drop_all(bind=self.__engine)
+        """Instantiate a DBStorage object"""
+        HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
+        HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
+        HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
+        HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
+        HBNB_ENV = getenv('HBNB_ENV')
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
+                                      format(HBNB_MYSQL_USER,
+                                             HBNB_MYSQL_PWD,
+                                             HBNB_MYSQL_HOST,
+                                             HBNB_MYSQL_DB))
+        if HBNB_ENV == "test":
+            Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """
-        query on the current database session (self.__session)
-        all objects depending of the class name (argument cls)
-        """
-        r_dict = {}
-        if cls:
-            for obj in self.__session.query(cls).all():
-                # objs -> list of returned objects
-                key = "{}.{}".format(type(obj).__name__, obj.id)
-                r_dict[key] = obj
-        else:
-            for cls in DBStorage.__classNames:
-                for obj in self.__session.query(cls).all():
-                    # objs -> list of returned objects
-                    key = "{}.{}".format(type(obj).__name__, obj.id)
-                    r_dict[key] = obj
-        return r_dict
+        """query on the current database session"""
+        new_dict = {}
+        for clss in classes:
+            if cls is None or cls is classes[clss] or cls is clss:
+                objs = self.__session.query(classes[clss]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    new_dict[key] = obj
+        return (new_dict)
 
     def new(self, obj):
-        """add the object to the current
-        database session (self.__session)"""
+        """add the object to the current database session"""
         self.__session.add(obj)
 
     def save(self):
-        """commit all changes of the current
-        database session (self.__session)"""
+        """commit all changes of the current database session"""
         self.__session.commit()
 
     def delete(self, obj=None):
-        """delete from the current OOAdatabase session obj if not None"""
-        if obj:
+        """delete from the current database session obj if not None"""
+        if obj is not None:
             self.__session.delete(obj)
 
     def reload(self):
-        """create all tables in the database (feature of SQLAlchemy)"""
-        from sqlalchemy.orm import sessionmaker
-
+        """reloads data from the database"""
         Base.metadata.create_all(self.__engine)
-        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        self.__session = Session()
-
-    def classes_dict(self):
-        """collection of classes"""
-
-        classes_dict = {
-            "BaseModel": BaseModel,
-            "State": State,
-            "City": City,
-            "User": User,
-            "Place": Place,
-            "Review": Review,
-            "Amenity": Amenity
-        }
-        return classes_dict
+        sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(sess_factory)
+        self.__session = Session
 
     def close(self):
-        """ 
-        method on the private session attribute (self.__session)
-        """
-        self.__session.close()
-    
+        """call remove() method on the private session attribute"""
+        self.__session.remove()
+
     def get(self, cls, id):
-        """ 
-        method to retrieve one object
-        """
-        if cls and id:
-            if cls in DBStorage.__classNames:
-                for obj in self.__session.query(cls).all():
-                    if id == obj.id:
-                        return obj
+        """Returns the object based on the class and its ID, or None"""
+        if type(cls) is not str:
+            cls = cls.__name__
+        return self.all().get(cls + "." + id)
 
     def count(self, cls=None):
-        """
-        A method to count the number of objects in storage
-        """
-        count = 0
-        count_ = 0 
+        """Count number of objects in storage"""
+        all_objects = self.all().values()
         if cls:
-            objs = self.__session.query(cls).all()
-            # objs -> list of returned objects
-            count = len(objs)
+            if type(cls) is not str:
+                cls = cls.__name__
+            return len([obj for obj in all_objects if type(
+                        obj).__name__ == cls])
         else:
-            for cls in DBStorage.__classNames:
-                objs = self.__session.query(cls).all()
-                # objs -> list of returned objects
-                count_ = len(objs)
-                count += count_
-        return count 
+            return len(self.all())
