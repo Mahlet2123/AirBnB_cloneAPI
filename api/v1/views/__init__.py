@@ -1,17 +1,10 @@
 #!/usr/bin/python3
-"""__init__ module"""
-from flask import Blueprint
-
-# Blueprint class is used to create modular and reusable sets of
-# routes and views in Flask applications.
-
-
-app_views = Blueprint("app_views", __name__, url_prefix="/api/v1")
-# Creates an instance of the Blueprint class named app_views
-
-from api.v1.views.index import *
-
 """
+__init__ module
+
+Blueprint class is used to create modular and reusable sets of
+routes and views in Flask applications.
+
 The line from api.v1.views.index import * is used to import all objects
 defined in the index module into the current namespace.
 
@@ -24,4 +17,11 @@ in index will be available in the current module.
 This allows the app_views blueprint to register these routes and views when
 it is used in the Flask application.
 """
+from flask import Blueprint
+
+
+app_views = Blueprint("app_views", __name__, url_prefix="/api/v1")
+# Creates an instance of the Blueprint class named app_views
+
+from api.v1.views.index import *
 from api.v1.views.states import *
