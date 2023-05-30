@@ -1,36 +1,30 @@
 #!/usr/bin/python3
-""" holds class State"""
-import models
+""" User module"""
 from models.base_model import BaseModel, Base
-from models.city import City
-from os import getenv
-import sqlalchemy
 from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
+from os import getenv
 
 
 class State(BaseModel, Base):
-    """Representation of state """
-    if models.storage_t == "db":
-        __tablename__ = 'states'
-        name = Column(String(128), nullable=False)
-        cities = relationship(
-                "City", backref="state", cascade='all, delete, delete-orphan'
-                )
-    else:
-        name = ""
+    """class State that inherits from BaseModel"""
 
-    def __init__(self, *args, **kwargs):
-        """initializes state"""
-        super().__init__(*args, **kwargs)
+    __tablename__ = "states"
+    name = Column(String(60), nullable=False)
 
-    if models.storage_t != "db":
+    cities = relationship("City", backref="state", cascade="all, delete")
+
+    if getenv("HBNB_TYPE_STORAGE") != "db":
+
         @property
         def cities(self):
-            """getter for list of city instances related to the state"""
+            """getter attribute cities that returns the list of City
+            instances with state_id equals to the current State.id"""
+            from models import storage
+            from models.city import City
+
             city_list = []
-            all_cities = models.storage.all(City)
-            for city in all_cities.values():
-                if city.state_id == self.id:
-                    city_list.append(city)
+            for city_key, city_obj in storage.all(City).items():
+                if city_obj.state_id == self.id:
+                    city_list.append(city_obj)
             return city_list
