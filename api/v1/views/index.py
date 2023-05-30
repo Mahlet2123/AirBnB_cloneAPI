@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 """
 A Flask route defined within the api.v1.views blueprint.
+
+The api.v1.views blueprint is important
+because it allows for modular organization and
+separation of routes and views in a Flask application.
+
 It returns a JSON response with a status message.
 """
 from api.v1.views import app_views

@@ -11,6 +11,9 @@ from os import getenv
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
+# Registers the app_views blueprint with the Flask application
+# using the register_blueprint method.
+# This blueprint contains the views and routes for the API.
 
 
 @app.teardown_appcontext
@@ -20,7 +23,7 @@ def remove_session(exception):
     storage.close()
 
 
-@app_views.errorhandler(404)
+@app.errorhandler(404)
 def not_found(error):
     """Handler for 404 errors"""
     return make_response(jsonify({"error": "Not found"}), 404)
