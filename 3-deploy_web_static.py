@@ -1,82 +1,52 @@
 #!/usr/bin/python3
-""" Fabric script (based on the file 1-pack_web_static.py)
-that distributes an archive to your web servers,
-using the function do_deploy """
-from fabric.network import ssh_config
-import os
+"""
+Fabric script based on the file 2-do_deploy_web_static.py that creates and
+distributes an archive to the web servers
+"""
+
+from fabric.api import env, local, put, run
 from datetime import datetime
-from fabric.api import *
-from fabric.api import env, put, run
-
-
-env.hosts = ["54.172.89.19", "75.101.217.125"]
-env.user = "ubuntu"
-env.key_filename = "/root/.ssh/id_rsa"
-env.use_ssh_config = True
+from os.path import exists, isdir
+env.hosts = ['142.44.167.228', '144.217.246.195']
 
 
 def do_pack():
-    """Creates archive from web_static directory"""
-    local("mkdir -p versions")
-    file = "versions/web_static_{}.tgz".format(
-        datetime.strftime(datetime.now(), "%Y%m%d%I%M%S")
-    )
-    comp = "tar -cvzf {} web_static".format(file)
-    tar_file = local(comp)
-    if tar_file.failed:
+    """generates a tgz archive"""
+    try:
+        date = datetime.now().strftime("%Y%m%d%H%M%S")
+        if isdir("versions") is False:
+            local("mkdir versions")
+        file_name = "versions/web_static_{}.tgz".format(date)
+        local("tar -cvzf {} web_static".format(file_name))
+        return file_name
+    except:
         return None
-    else:
-        return file
 
 
 def do_deploy(archive_path):
-    """Deploys an archive"""
-    if not os.path.exists(archive_path):
+    """distributes an archive to the web servers"""
+    if exists(archive_path) is False:
         return False
-    arch = archive_path.split("/")[1]
-    name = arch.split(".")[0]
-    tar_file = put(archive_path, "/tmp/{}".format(arch))
-    if tar_file.failed:
+    try:
+        file_n = archive_path.split("/")[-1]
+        no_ext = file_n.split(".")[0]
+        path = "/data/web_static/releases/"
+        put(archive_path, '/tmp/')
+        run('mkdir -p {}{}/'.format(path, no_ext))
+        run('tar -xzf /tmp/{} -C {}{}/'.format(file_n, path, no_ext))
+        run('rm /tmp/{}'.format(file_n))
+        run('mv {0}{1}/web_static/* {0}{1}/'.format(path, no_ext))
+        run('rm -rf {}{}/web_static'.format(path, no_ext))
+        run('rm -rf /data/web_static/current')
+        run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
+        return True
+    except:
         return False
-    tar_file = run("mkdir -p /data/web_static/releases/{}".format(name))
-    if tar_file.failed:
-        return False
-    tar_file = run(
-        "tar -xzf /tmp/{} -C /data/web_static/releases/{}/".format(arch, name)
-    )
-    if tar_file.failed:
-        return False
-    tar_file = run("rm /tmp/{}".format(arch))
-    if tar_file.failed:
-        return False
-    comp = "mv /data/web_static/releases/{0}/web_static/*"
-    comp += " /data/web_static/releases/{0}/"
-    tar_file = run(comp.format(name))
-    if tar_file.failed:
-        return False
-    tar_file = run("rm -rf /data/web_static/releases/{}/web_static".format(
-        name))
-    if tar_file.failed:
-        return False
-    tar_file = run("rm -rf /data/web_static/current")
-    if tar_file.failed:
-        return False
-    tar_file = run(
-        "ln -s /data/web_static/releases/{}/ /data/web_static/current".format(
-            name)
-    )
-    if tar_file.failed:
-        return False
-    print("New version deployed!")
-    return True
 
 
 def deploy():
-    """Fabric script (based on the file 2-do_deploy_web_static.py)
-    that creates and distributes an archive to your web servers,
-    using the function deploy"""
-    archive = do_pack()
-    if archive is None:
+    """creates and distributes an archive to the web servers"""
+    archive_path = do_pack()
+    if archive_path is None:
         return False
-    tar_file = do_deploy(archive)
-    return tar_file
+    return do_deploy(archive_path)
