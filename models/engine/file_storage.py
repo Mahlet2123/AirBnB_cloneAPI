@@ -2,8 +2,8 @@
 """
 Contains the FileStorage class
 """
+
 import json
-import models
 from models.amenity import Amenity
 from models.base_model import BaseModel
 from models.city import City
@@ -11,10 +11,10 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-from hashlib import md5
 
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
+
 
 class FileStorage:
     """serializes instances to a JSON file & deserializes back to instances"""
@@ -23,20 +23,6 @@ class FileStorage:
     __file_path = "file.json"
     # dictionary - empty but will store all objects by <class name>.id
     __objects = {}
-
-    def get(self, cls=None, id=""):
-        """returns object of type cls with string id or None if nonexistent"""
-        if cls is not None and id != "":
-            all_cls = self.all(cls)
-            for key, value in all_cls.items():
-                if key.split(".")[-1] == id:
-                    return value
-        return None
-
-    def count(self, cls=None):
-        """return num of objs matching class name or all if no class name"""
-        all_cls = self.all(cls)
-        return len(all_cls.items())
 
     def all(self, cls=None):
         """returns the dictionary __objects"""
@@ -58,9 +44,7 @@ class FileStorage:
         """serializes __objects to the JSON file (path: __file_path)"""
         json_objects = {}
         for key in self.__objects:
-            if key == "password":
-                json_objects[key].decode()
-            json_objects[key] = self.__objects[key].to_dict(save_fs=1)
+            json_objects[key] = self.__objects[key].to_dict()
         with open(self.__file_path, 'w') as f:
             json.dump(json_objects, f)
 
@@ -71,7 +55,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except Exception as e:
+        except Exception:
             pass
 
     def delete(self, obj=None):
@@ -84,3 +68,20 @@ class FileStorage:
     def close(self):
         """call reload() method for deserializing the JSON file to objects"""
         self.reload()
+
+    def get(self, cls, id):
+        """Retrieves one object based on class and ID, None if not found"""
+        if type(cls) is not str:
+            cls = cls.__name__
+        return self.__objects.get(cls + "." + id)
+
+    def count(self, cls=None):
+        """Counts the number of objects in storage matching cls"""
+        all_objs = self.all().values()
+        if cls:
+            if type(cls) is not str:
+                cls = cls.__name__
+            return len([obj for obj in all_objs if type(obj).__name__ == cls])
+        else:
+            return len(self.all())
+        return len(self.all(cls))
