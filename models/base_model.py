@@ -4,72 +4,81 @@ Contains class BaseModel
 """
 
 from datetime import datetime
-from uuid import uuid4
 import models
+from os import getenv
+import sqlalchemy
+from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime
+import uuid
 
+time = "%Y-%m-%dT%H:%M:%S.%f"
 
-Base = declarative_base()
+if models.storage_t == "db":
+    Base = declarative_base()
+else:
+    Base = object
 
 
 class BaseModel:
-    """construct"""
-
-    id = Column(String(60), nullable=False, primary_key=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    """The BaseModel class from which future classes will be derived"""
+    if models.storage_t == "db":
+        id = Column(String(60), primary_key=True)
+        created_at = Column(DateTime, default=datetime.utcnow)
+        updated_at = Column(DateTime, default=datetime.utcnow)
 
     def __init__(self, *args, **kwargs):
-        """Construct"""
+        """Initialization of the base model"""
         if kwargs:
             for key, value in kwargs.items():
-                if key == "__class__":
-                    continue
-                elif key == "updated_at":
-                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                elif key == "created_at":
-                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                if "id" not in kwargs.keys():
-                    self.id = str(uuid4())
-                if "created_at" not in kwargs.keys():
-                    self.created_at = datetime.now()
-                if "updated_at" not in kwargs.keys():
-                    self.updated_at = datetime.now()
-                setattr(self, key, value)
+                if key != "__class__":
+                    setattr(self, key, value)
+            if kwargs.get("created_at", None) and type(self.created_at) is str:
+                self.created_at = datetime.strptime(kwargs["created_at"], time)
+            else:
+                self.created_at = datetime.utcnow()
+            if kwargs.get("updated_at", None) and type(self.updated_at) is str:
+                self.updated_at = datetime.strptime(kwargs["updated_at"], time)
+            else:
+                self.updated_at = datetime.utcnow()
+            if kwargs.get("id", None) is None:
+                self.id = str(uuid.uuid4())
         else:
-            self.id = str(uuid4())
-            self.created_at = datetime.now()
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.utcnow()
             self.updated_at = self.created_at
 
     def __str__(self):
-        """String"""
-        _dict = self.to_dict()
-        if '__class__' in _dict:
-            del _dict['__class__']
-        return "[{}] ({}) {}".format(self.__class__.__name__, self.id, _dict)
-
-    def __repr__(self):
-        """return a string representaion
-        """
-        return self.__str__()
+        """String representation of the BaseModel class"""
+        return "[{:s}] ({:s}) {}".format(self.__class__.__name__, self.id,
+                                         self.to_dict())
 
     def save(self):
-        """save function"""
-        self.updated_at = datetime.now()
+        """updates the attribute 'updated_at' with the current datetime"""
+        self.updated_at = datetime.utcnow()
         models.storage.new(self)
         models.storage.save()
 
-    def to_dict(self):
-        """Return a dictonary"""
-        aux_dict = self.__dict__.copy()
-        if '_sa_instance_state' in self.__dict__.keys():
-            aux_dict.pop('_sa_instance_state', None)
-        aux_dict["__class__"] = self.__class__.__name__
-        aux_dict["created_at"] = self.created_at.isoformat()
-        aux_dict["updated_at"] = self.updated_at.isoformat()
-        return aux_dict
+    def to_dict(self, include_password=False):
+        """returns a dictionary containing all keys/values of the instance"""
+        new_dict = self.__dict__.copy()
+        if "created_at" in new_dict:
+            new_dict["created_at"] = new_dict["created_at"].strftime(time)
+        if "updated_at" in new_dict:
+            new_dict["updated_at"] = new_dict["updated_at"].strftime(time)
+        new_dict["__class__"] = self.__class__.__name__
+
+        # Remove unnecessary keys
+        new_dict.pop("_sa_instance_state", None)
+        # the second argument 'None' is opetional, This means that if
+        # the specified key ("_sa_instance_state", "password") is not
+        # present in the dictionary, no error will be raised. It simply
+        # returns None and does not modify the dictionary.
+
+        if include_password:
+            new_dict.pop('password', None)
+
+        return new_dict
 
     def delete(self):
-        """to delete the current instance from the storage (models.storage)"""
+        """delete the current instance from the storage"""
         models.storage.delete(self)
