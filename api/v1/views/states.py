@@ -88,7 +88,7 @@ def update_state(state_id):
                 setattr(state, key, value)
         storage.save()
         dict_ = state.to_dict()
-        response = make_response(jsonify(dict_), 201)
+        response = make_response(jsonify(dict_), 200)
         return response
     else:
         abort(404)
