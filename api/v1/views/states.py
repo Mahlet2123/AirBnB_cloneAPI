@@ -14,7 +14,9 @@ import json
 
 @app_views.route("/states", strict_slashes=False)
 def states():
-    """ Retrieves the list of all State objects """
+    """
+    Retrieves the list of all State objects
+    """
     all_states = storage.all(State).values()
     state_list = []
     for states in all_states:
@@ -23,7 +25,9 @@ def states():
 
 @app_views.route("/states/<state_id>", strict_slashes=False)
 def states_by_id(state_id):
-    """ Retrieves a State object """
+    """
+    Retrieves a State object
+    """
     state = storage.get(State, state_id)
     if state:
         return jsonify(state.to_dict())
@@ -32,7 +36,9 @@ def states_by_id(state_id):
 
 @app_views.route("/states/<state_id>", methods=['DELETE'], strict_slashes=False)
 def delete_state(state_id):
-    """ Deletes a State object """
+    """
+    Deletes a State object
+    """
     state = storage.get(State, state_id)
     if state:
         empty_dict = {}
@@ -45,7 +51,9 @@ def delete_state(state_id):
 
 @app_views.route("/states", methods=['POST'], strict_slashes=False)
 def create_state():
-    """ Creates a State """
+    """
+    Creates a State
+    """
     data = request.get_json()
     if data:
         try:
@@ -63,7 +71,9 @@ def create_state():
 
 @app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=False)
 def update_state(state_id):
-    """ Updates a State """
+    """
+    Updates a State
+    """
     state = storage.get(State, state_id)
     if state:
         data = request.get_json()
