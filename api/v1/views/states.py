@@ -23,6 +23,7 @@ def states():
         state_list.append(states.to_dict())
     return jsonify(state_list)
 
+
 @app_views.route("/states/<state_id>", strict_slashes=False)
 def states_by_id(state_id):
     """
@@ -34,7 +35,10 @@ def states_by_id(state_id):
     else:
         abort(404)
 
-@app_views.route("/states/<state_id>", methods=['DELETE'], strict_slashes=False)
+
+@app_views.route(
+        "/states/<state_id>", methods=["DELETE"], strict_slashes=False
+        )
 def delete_state(state_id):
     """
     Deletes a State object
@@ -49,7 +53,8 @@ def delete_state(state_id):
     else:
         abort(404)
 
-@app_views.route("/states", methods=['POST'], strict_slashes=False)
+
+@app_views.route("/states", methods=["POST"], strict_slashes=False)
 def create_state():
     """
     Creates a State
@@ -59,17 +64,18 @@ def create_state():
         try:
             json.dumps(data)
         except ValueError:
-            return jsonify('Not a JSON'), 400
-        if 'name' in data:
+            return jsonify("Not a JSON"), 400
+        if "name" in data:
             new_state = State(**data)
             storage.new(new_state)
             storage.save()
             dict_ = new_state.to_dict()
             return jsonify(dict_), 201
     else:
-        return jsonify('Missing name'), 400
+        return jsonify("Missing name"), 400
 
-@app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=False)
+
+@app_views.route("/states/<state_id>", methods=["PUT"], strict_slashes=False)
 def update_state(state_id):
     """
     Updates a State
@@ -81,16 +87,16 @@ def update_state(state_id):
             try:
                 json.dumps(data)
             except ValueError:
-                return jsonify('Not a JSON'), 400
+                return jsonify("Not a JSON"), 400
             for key, value in data.items():
                 list_ = ["id", "created_at", "updated_at"]
                 if key not in list_:
-                    setattr (state, key, value)
+                    setattr(state, key, value)
                 storage.save()
                 dict_ = state.to_dict()
                 response = make_response(jsonify(dict_), 201)
             return response
         else:
-            return jsonify('Missing name'), 400
+            return jsonify("Missing name"), 400
     else:
         abort(400)
