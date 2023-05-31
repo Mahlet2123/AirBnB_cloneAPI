@@ -91,4 +91,4 @@ def update_state(state_id):
         response = make_response(jsonify(dict_), 201)
         return response
     else:
-        abort(400)
+        abort(404)
