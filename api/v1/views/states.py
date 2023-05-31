@@ -60,17 +60,14 @@ def create_state():
     Creates a State
     """
     data = request.get_json()
-    if data:
-        try:
-            json.dumps(data)
-        except ValueError:
-            return jsonify("Not a JSON"), 400
-        if "name" in data:
-            new_state = State(**data)
-            storage.new(new_state)
-            storage.save()
-            dict_ = new_state.to_dict()
-            return jsonify(dict_), 201
+    if not data:
+        return jsonify('Not a JSON'), 400
+    if "name" in data:
+        new_state = State(**data)
+        storage.new(new_state)
+        storage.save()
+        dict_ = new_state.to_dict()
+        return jsonify(dict_), 201
     else:
         return jsonify("Missing name"), 400
 
@@ -83,20 +80,15 @@ def update_state(state_id):
     state = storage.get(State, state_id)
     if state:
         data = request.get_json()
-        if data:
-            try:
-                json.dumps(data)
-            except ValueError:
-                return jsonify("Not a JSON"), 400
-            for key, value in data.items():
-                list_ = ["id", "created_at", "updated_at"]
-                if key not in list_:
-                    setattr(state, key, value)
-                storage.save()
-                dict_ = state.to_dict()
-                response = make_response(jsonify(dict_), 201)
-            return response
-        else:
-            return jsonify("Missing name"), 400
+        if not data:
+            return jsonify("Not a JSON"), 400
+        for key, value in data.items():
+            list_ = ["id", "created_at", "updated_at"]
+            if key not in list_:
+                setattr(state, key, value)
+        storage.save()
+        dict_ = state.to_dict()
+        response = make_response(jsonify(dict_), 201)
+        return response
     else:
         abort(400)
