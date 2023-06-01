@@ -29,7 +29,7 @@ def amenity_by_id(amenity_id):
     """
     Retrieves an Amenity object
     """
-    amenity = storage.get(State, amenity_id)
+    amenity = storage.get(Amenity, amenity_id)
     if amenity:
         return jsonify(amenity.to_dict())
     else:
@@ -37,7 +37,7 @@ def amenity_by_id(amenity_id):
 
 
 @app_views.route(
-        "/amenitys/<amenity_id>", methods=["DELETE"], strict_slashes=False
+        "/amenities/<amenity_id>", methods=["DELETE"], strict_slashes=False
         )
 def delete_amenity(amenity_id):
     """
@@ -45,11 +45,9 @@ def delete_amenity(amenity_id):
     """
     amenity = storage.get(Amenity, amenity_id)
     if amenity:
-        empty_dict = {}
         storage.delete(amenity)
         storage.save()
-        response = make_response(jsonify(empty_dict), 200)
-        return response
+        return jsonify({}), 200
     else:
         abort(404)
 
@@ -77,7 +75,7 @@ def update_amenity(amenity_id):
     """
     Updates an Amenity
     """
-    amenity = storage.get(State, amenity_id)
+    amenity = storage.get(Amenity, amenity_id)
     if amenity:
         data = request.get_json()
         if not data:
