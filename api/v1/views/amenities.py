@@ -17,7 +17,7 @@ def amenities():
     """
     Retrieves the list of all Amenity objects
     """
-    all_amenities  = storage.all(Amenity).values()
+    all_amenities = storage.all(Amenity).values()
     amenity_list = []
     for amenity in all_amenities:
         amenity_list.append(amenity.to_dict())
@@ -59,7 +59,7 @@ def create_amenity():
     """
     data = request.get_json()
     if not data:
-        return jsonify('Not a JSON'), 400
+        return jsonify("Not a JSON"), 400
     if "name" in data:
         new_amenity = Amenity(**data)
         storage.new(new_amenity)
@@ -70,7 +70,9 @@ def create_amenity():
         return jsonify("Missing name"), 400
 
 
-@app_views.route("/amenities/<amenity_id>", methods=["PUT"], strict_slashes=False)
+@app_views.route(
+        "/amenities/<amenity_id>", methods=["PUT"], strict_slashes=False
+        )
 def update_amenity(amenity_id):
     """
     Updates an Amenity
