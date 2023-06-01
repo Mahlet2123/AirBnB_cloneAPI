@@ -12,6 +12,7 @@ from models.state import State
 from models.city import City
 import json
 
+
 @app_views.route("/states/<state_id>/cities", strict_slashes=False)
 def city(state_id):
     """
@@ -26,6 +27,7 @@ def city(state_id):
     else:
         abort(404)
 
+
 @app_views.route("/cities/<city_id>", strict_slashes=False)
 def city_by_id(city_id):
     """
@@ -36,6 +38,7 @@ def city_by_id(city_id):
         return jsonify(city.to_dict())
     else:
         abort(404)
+
 
 @app_views.route("/cities/<city_id>", methods=["DELETE"], strict_slashes=False)
 def delete_city(city_id):
@@ -50,7 +53,10 @@ def delete_city(city_id):
     else:
         abort(404)
 
-@app_views.route("/states/<state_id>/cities", methods=["POST"], strict_slashes=False)
+
+@app_views.route(
+        "/states/<state_id>/cities", methods=["POST"], strict_slashes=False
+        )
 def create_city(state_id):
     """
     Creates a City
@@ -59,9 +65,9 @@ def create_city(state_id):
     if state:
         data = request.get_json()
         if not data:
-            return jsonify('Not a JSON'), 400
+            return jsonify("Not a JSON"), 400
         if "name" in data:
-            data['state_id'] = str(state.id)
+            data["state_id"] = str(state.id)
             new_city = City(**data)
             storage.new(new_city)
             storage.save()
@@ -72,6 +78,7 @@ def create_city(state_id):
     else:
         abort(404)
 
+
 @app_views.route("/cities/<city_id>", methods=["PUT"], strict_slashes=False)
 def update_city(city_id):
     """
@@ -81,7 +88,7 @@ def update_city(city_id):
     if city:
         data = request.get_json()
         if not data:
-            return jsonify('Not a JSON'), 400
+            return jsonify("Not a JSON"), 400
         keys = ["id", "created_at", "updated_at"]
         for key, value in data.items():
             if key not in keys:
