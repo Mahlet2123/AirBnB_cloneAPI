@@ -7,7 +7,7 @@ import requests
 if __name__ == "__main__":
     """ verify if password is retrieve
     """
-    r = requests.get("http://0.0.0.0:5050/api/v1/users")
+    r = requests.get("http://0.0.0.0:5000/api/v1/users")
     r_j = r.json()
     for user_j in r_j:
         if user_j.get("password") is None:
