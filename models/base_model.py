@@ -71,9 +71,8 @@ class BaseModel:
         aux_dict["created_at"] = self.created_at.isoformat()
         aux_dict["updated_at"] = self.updated_at.isoformat()
 
-        if getenv("HBNB_TYPE_STORAGE") == 'db':
-            if not include_password and 'password' in aux_dict:
-                aux_dict.pop('password', None)
+        if not include_password and 'password' in aux_dict:
+            del aux_dict['password']
 
         return aux_dict
 
