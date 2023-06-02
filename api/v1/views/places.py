@@ -40,7 +40,9 @@ def place_by_id(place_id):
         abort(404)
 
 
-@app_views.route("/places/<place_id>", methods=["DELETE"], strict_slashes=False)
+@app_views.route(
+        "/places/<place_id>", methods=["DELETE"], strict_slashes=False
+        )
 def delete_place(place_id):
     """
     Deletes a Place object
@@ -61,14 +63,15 @@ def create_place(city_id):
     """
     Creates a Place
     """
+    data = request.get_json()
+    if not data:
+        return jsonify("Not a JSON"), 400
     city = storage.get(City, city_id)
-    if city:
-        data = request.get_json()
-        if not data:
-            return jsonify("Not a JSON"), 400
-        if not "user_id" in data:
+    user = storage.get(User, data[user_id])
+    if city and user:
+        if "user_id" not in data:
             return jsonify("Missing user_id"), 400
-        if not "name" in data:
+        if "name" not in data:
             return jsonify("Missing name"), 400
         data["city_id"] = str(city.id)
         new_place = Place(**data)
