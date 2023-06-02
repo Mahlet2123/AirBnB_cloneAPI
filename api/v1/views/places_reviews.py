@@ -60,7 +60,7 @@ def delete_review(review_id):
 @app_views.route(
         "/places/<place_id>/reviews", methods=["POST"], strict_slashes=False
         )
-def create_review(review_id):
+def create_review(place_id):
     """
     Creates a Review
     """
@@ -71,6 +71,7 @@ def create_review(review_id):
         return jsonify("Missing user_id"), 400
     if "text" not in data:
         return jsonify("Missing text"), 400
+
     place = storage.get(Place, place_id)
     user = storage.get(User, data["user_id"])
     if place and user:
@@ -82,7 +83,6 @@ def create_review(review_id):
         return jsonify(dict_), 201
     else:
         abort(404)
-
 
 @app_views.route("/reviews/<review_id>", methods=["PUT"], strict_slashes=False)
 def update_review(review_id):
