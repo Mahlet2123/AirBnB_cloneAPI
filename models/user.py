@@ -40,3 +40,4 @@ class User(BaseModel, Base):
         """Hashes the password using MD5"""
         hashed_password = hashlib.md5(password.encode()).hexdigest()
         self.password = hashed_password
+        storage.save()
