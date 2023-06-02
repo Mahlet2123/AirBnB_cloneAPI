@@ -66,13 +66,13 @@ def create_place(city_id):
     data = request.get_json()
     if not data:
         return jsonify("Not a JSON"), 400
+    if "user_id" not in data:
+        return jsonify("Missing user_id"), 400
+    if "name" not in data:
+        return jsonify("Missing name"), 400
     city = storage.get(City, city_id)
-    user = storage.get(User, data[user_id])
+    user = storage.get(User, data["user_id"])
     if city and user:
-        if "user_id" not in data:
-            return jsonify("Missing user_id"), 400
-        if "name" not in data:
-            return jsonify("Missing name"), 400
         data["city_id"] = str(city.id)
         new_place = Place(**data)
         storage.new(new_place)
