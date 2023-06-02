@@ -84,6 +84,7 @@ def create_review(place_id):
     else:
         abort(404)
 
+
 @app_views.route("/reviews/<review_id>", methods=["PUT"], strict_slashes=False)
 def update_review(review_id):
     """
